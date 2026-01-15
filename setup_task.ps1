@@ -22,9 +22,14 @@ $Trigger = New-ScheduledTaskTrigger -Daily -At 12:00am
 $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
 
 try {
-    # Register purely as the current user ("LogonUser" ensures it runs in the user's session to change wallpaper)
-    Register-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Settings -TaskName $TaskName -Description "Daily wallpaper update with guard against duplicate runs." -User "LogonUser" -Force
+    # Get the current user (DOMAIN\Username) to ensure the task runs as the correct user
+    $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+
+    # Register the task
+    Register-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Settings -TaskName $TaskName -Description "Daily wallpaper update with guard against duplicate runs." -User $CurrentUser -Force
+
     Write-Host "Task '$TaskName' created successfully."
+    Write-Host "Run As User: $CurrentUser"
     Write-Host "Trigger: Daily at 12:00 AM (or next available)."
     Write-Host "Command: $GuardScript"
 }
