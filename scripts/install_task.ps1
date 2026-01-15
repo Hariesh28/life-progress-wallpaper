@@ -1,10 +1,10 @@
 $ErrorActionPreference = "Stop"
 
 $TaskName = "DailyWallpaperUpdate"
-$GuardScript = "$PSScriptRoot\GuardWallpaperUpdate.ps1"
+$GuardScript = "$PSScriptRoot\guard_runner.ps1"
 
 if (-not (Test-Path $GuardScript)) {
-    Write-Error "Could not find GuardWallpaperUpdate.ps1 at $GuardScript"
+    Write-Error "Could not find guard_runner.ps1 at $GuardScript"
     exit 1
 }
 

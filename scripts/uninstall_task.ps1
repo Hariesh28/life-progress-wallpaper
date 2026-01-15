@@ -19,9 +19,10 @@ else {
 }
 
 # 2. Cleanup Runtime Files (Logs and State)
+$ProjectRoot = Resolve-Path "$PSScriptRoot\.."
 $FilesToRemove = @(
-    "$PSScriptRoot\wallpaper_state.json",
-    "$PSScriptRoot\wallpaper_activity.log"
+    "$ProjectRoot\wallpaper_state.json",
+    "$ProjectRoot\wallpaper_activity.log"
 )
 
 foreach ($File in $FilesToRemove) {

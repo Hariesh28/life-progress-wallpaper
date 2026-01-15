@@ -44,7 +44,7 @@ _Turn your desktop into a daily reminder to make every day count._
     Edit `life_config.json` to set your birthdate and preferences.
 
 4.  **Install Automation**:
-    Right-click `setup_task.ps1` and select **"Run with PowerShell"**.
+    Right-click `scripts\install_task.ps1` and select **"Run with PowerShell"**.
 
     > **What this does:**
     >
@@ -64,7 +64,7 @@ The system consists of three main components:
     - Triggers daily at midnight.
     - Launches the Guard Script hidden in the background.
 
-2.  **Guard Script (`GuardWallpaperUpdate.ps1`)**:
+2.  **Guard Script (`scripts\guard_runner.ps1`)**:
 
     - **Check**: Reads `wallpaper_state.json` to see if the update ran today.
     - **Decide**:
@@ -86,10 +86,10 @@ Check `wallpaper_activity.log` in the project folder for run history and error m
 
 **Manual Run:**
 To force an update immediately, you can run the batch file:
-`.\run_wallpaper.bat`
+`.\scripts\run_wallpaper.bat`
 
 **Reset Schedule:**
-If you need to re-register the task, simply run `setup_task.ps1` again. It will overwrite the existing task with the correct settings.
+If you need to re-register the task, simply run `scripts\install_task.ps1` again. It will overwrite the existing task with the correct settings.
 
 ---
 
@@ -97,7 +97,7 @@ If you need to re-register the task, simply run `setup_task.ps1` again. It will 
 
 To remove the scheduled automation and cleanup logs:
 
-1.  Right-click `uninstall.ps1` and select **"Run with PowerShell"**.
+1.  Right-click `scripts\uninstall_task.ps1` and select **"Run with PowerShell"**.
     _(Run as Administrator if prompted)_
 
 This will:

@@ -1,8 +1,10 @@
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$StateFile = "$PSScriptRoot\wallpaper_state.json"
-$LogFile = "$PSScriptRoot\wallpaper_activity.log"
+# Since this script is now in /scripts/, we need to look up one level for state/log and sibling for bat
+$ProjectRoot = Resolve-Path "$PSScriptRoot\.."
+$StateFile = "$ProjectRoot\wallpaper_state.json"
+$LogFile = "$ProjectRoot\wallpaper_activity.log"
 $WallpaperScript = "$PSScriptRoot\run_wallpaper.bat"
 
 # Function to write to log

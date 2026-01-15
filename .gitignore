@@ -1,1 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Runtime / Logs
+*.log
+wallpaper_activity.log
+wallpaper_state.json
+
+# Image Artifacts
 life_wallpaper.png
+
+# MacOS
+.DS_Store
