@@ -1,0 +1,3 @@
+"""
+Life Wallpaper Generator
+"""

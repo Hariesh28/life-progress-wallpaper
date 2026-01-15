@@ -1,19 +1,12 @@
-"""
-Generates a high-fidelity 4K wallpaper dashboard visualizing life progress,
-calendar data, and motivational quotes.
-"""
-
 import os
-import sys
-import json
-import ctypes
 import math
 import random
-from datetime import date, datetime
 import calendar
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from datetime import date, datetime
+from PIL import Image, ImageDraw, ImageFilter
 
-CONFIG_FILE = "life_config.json"
+from .config import AppConfig
+from .utils import load_font_family
 
 # Canvas Constraints (4K Native)
 WIDTH = 3840
@@ -45,38 +38,27 @@ FONTS_BODY = ["inter-medium.ttf", "roboto-medium.ttf", "arial.ttf"]
 FONTS_REG = ["inter-regular.ttf", "roboto-regular.ttf", "arial.ttf"]
 FONTS_BOLD = ["inter-semibold.ttf", "roboto-bold.ttf", "arialbd.ttf"]
 
-DEFAULT_DATA = {
-    "name": "User",
-    "dob": "2000-01-01",
-    "life_expectancy": 80,
-    "mantra": "THIS DAY WILL NOT COME AGAIN",
-    "quote_bottom": "TIME IS THE ONLY NON-RENEWABLE RESOURCE",
-}
 
-
-class LifeLedger:
+class WallpaperRenderer:
     """
     Main controller for generating the wallpaper visualization.
-    Handles data loading, image drawing, and post-processing.
+    Handles image drawing and post-processing.
     """
 
-    def __init__(self):
-        self.raw_config = self._load_config()
-        self.data = {
-            "name": self.raw_config.get("profile", {}).get("name", "User"),
-            "dob": self.raw_config.get("profile", {}).get("dob", "2000-01-01"),
-            "life_expectancy": self.raw_config.get("profile", {}).get(
-                "life_expectancy", 80
-            ),
-            "mantra": random.choice(
-                self.raw_config.get("collections", {}).get("mantras", ["CARPE DIEM"])
-            ),
-            "quote_bottom": random.choice(
-                self.raw_config.get("collections", {}).get(
-                    "footer_quotes", ["TIME FLIES"]
-                )
-            ),
-        }
+    def __init__(self, config: AppConfig):
+        self.config = config
+
+        # Prepare data for rendering
+        self.mantra = (
+            random.choice(config.collections.mantras)
+            if config.collections.mantras
+            else "CARPE DIEM"
+        )
+        self.val_quote_bottom = (
+            random.choice(config.collections.footer_quotes)
+            if config.collections.footer_quotes
+            else "TIME FLIES"
+        )
 
         self.W = WIDTH * SCALE
         self.H = HEIGHT * SCALE
@@ -97,23 +79,10 @@ class LifeLedger:
         self.f_nano = self._load_font(FONTS_REG, 14)
         self.f_big_pct = self._load_font(FONTS_HEAD, 54)
 
-    def _load_config(self):
-        """Load configuration from JSON file or return default data."""
-        try:
-            with open(os.path.join(os.path.dirname(__file__), CONFIG_FILE), "r") as f:
-                return json.load(f)
-        except Exception as e:
-            return DEFAULT_DATA
-
     def _load_font(self, font_list, size_pt):
-        """Attempts to load a font from the provided list, respecting preference order."""
+        """Helper to load font with scaling."""
         size_px = int(size_pt * self.s * SCALE)
-        for name in font_list:
-            try:
-                return ImageFont.truetype(name, size_px)
-            except Exception:
-                continue
-        return ImageFont.load_default()
+        return load_font_family(font_list, size_px)
 
     def _draw_text_centered(self, x, y, text, font, fill, align_vertical=False):
         """Draws text centered horizontally at the given coordinates."""
@@ -147,6 +116,9 @@ class LifeLedger:
             )
             overlay = overlay.filter(ImageFilter.GaussianBlur(blur_r))
             self.img.paste(overlay, (int(cx - pad), int(cy - pad)), overlay)
+            # Re-create draw object after paste operations might be needed if switching modes or buffers,
+            # but usually fine if just pasting onto RGBA/RGB background.
+            # However, the original code recreated `self.draw`. Let's stick to safe practice.
             self.draw = ImageDraw.Draw(self.img, "RGBA")
 
         self.draw.ellipse(
@@ -164,12 +136,15 @@ class LifeLedger:
         """Renders the top header with date and mantra."""
         today = date.today()
         date_str = today.strftime("%A %d").upper()
-        mantra = self.data.get("mantra", "AMOR FATI").upper()
 
         y_pos = self.H * Y_HEADER
         self._draw_text_centered(self.W / 2, y_pos, date_str, self.f_hero, C_TEXT_HEAD)
         self._draw_text_centered(
-            self.W / 2, y_pos + 170 * self.s, mantra, self.f_sub, (255, 255, 255, 70)
+            self.W / 2,
+            y_pos + 170 * self.s,
+            self.mantra,
+            self.f_sub,
+            (255, 255, 255, 70),
         )
 
     def draw_grid_system(self):
@@ -263,8 +238,9 @@ class LifeLedger:
     def draw_life_trajectory(self):
         """Renders the life expectancy progress bar."""
         today = date.today()
-        dob = datetime.strptime(self.data.get("dob", "2000-01-01"), "%Y-%m-%d").date()
-        expectancy = self.data.get("life_expectancy", 80)
+        # Ensure we work with date objects
+        dob = self.config.profile.dob
+        expectancy = self.config.profile.life_expectancy
         death = date(dob.year + expectancy, dob.month, dob.day)
 
         days_lived = (today - dob).days
@@ -305,14 +281,14 @@ class LifeLedger:
         )
 
         # Life Statistics
-        name = self.data.get("name", "USER").upper()
+        name = self.config.profile.name.upper()
         stats_txt = f"{name}  •  {int(years_lived)} YEARS  //  {int(weeks_lived):,} WEEKS  //  {int(days_lived):,} DAYS"
         self._draw_text_right(
             bar_x + bar_w, bar_y - 20 * self.s, stats_txt, self.f_tiny, C_ACCENT
         )
 
         # Footer Quote
-        quote = self.data.get("quote_bottom", "TIME IS THE ONLY NON-RENEWABLE RESOURCE")
+        quote = self.val_quote_bottom
         self._draw_text_centered(
             self.W / 2, bar_y + 60 * self.s, quote, self.f_nano, (90, 90, 90)
         )
@@ -410,24 +386,24 @@ class LifeLedger:
 
     def apply_grain_and_vignette(self):
         """Applies cinematic grain and vignette properties to the final image."""
-        vignette = Image.new("L", (self.W, self.H), 255)
+        vignette = Image.new("L", (int(self.W), int(self.H)), 255)
         d_v = ImageDraw.Draw(vignette)
         d_v.ellipse((0, 0, self.W, self.H), fill=0)
         vignette = vignette.filter(ImageFilter.GaussianBlur(radius=300 * self.s))
-        black = Image.new("RGB", (self.W, self.H), (0, 0, 0))
+        black = Image.new("RGB", (int(self.W), int(self.H)), (0, 0, 0))
         vignette = vignette.point(lambda p: p * 0.08)
         self.img.paste(black, (0, 0), vignette)
 
         noise_size = (int(self.W / 4), int(self.H / 4))
         noise_data = os.urandom(noise_size[0] * noise_size[1])
         noise_img = Image.frombytes("L", noise_size, noise_data)
-        noise_img = noise_img.resize((self.W, self.H), Image.NEAREST)
-        noise_layer = Image.new("RGB", (self.W, self.H), (30, 30, 30))
+        noise_img = noise_img.resize((int(self.W), int(self.H)), Image.NEAREST)
+        noise_layer = Image.new("RGB", (int(self.W), int(self.H)), (30, 30, 30))
         mask = noise_img.point(lambda p: p * 0.015)
         self.img.paste(noise_layer, (0, 0), mask)
 
-    def generate(self):
-        """Execution pipeline."""
+    def render(self) -> str:
+        """Execution pipeline. Returns path to generated image."""
         print("Rendering Life Ledger (4K)...")
         self.draw_header()
         self.draw_grid_system()
@@ -438,20 +414,6 @@ class LifeLedger:
         print("Applying post-processing...")
         self.apply_grain_and_vignette()
 
-        out_path = os.path.join(os.path.dirname(__file__), "life_wallpaper.png")
+        out_path = os.path.join(os.getcwd(), "life_wallpaper.png")
         self.img.save(out_path, quality=100)
         return out_path
-
-
-if __name__ == "__main__":
-    app = LifeLedger()
-    path = app.generate()
-
-    if sys.platform == "win32":
-        try:
-            ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 3)
-            print("Wallpaper Updated.")
-        except Exception as e:
-            print(f"Error setting wallpaper: {e}")
-    else:
-        print(f"Generated: {path}")
