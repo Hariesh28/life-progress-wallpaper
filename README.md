@@ -93,6 +93,21 @@ If you need to re-register the task, simply run `setup_task.ps1` again. It will 
 
 ---
 
+## 🗑️ Uninstallation
+
+To remove the scheduled automation and cleanup logs:
+
+1.  Right-click `uninstall.ps1` and select **"Run with PowerShell"**.
+    _(Run as Administrator if prompted)_
+
+This will:
+
+- Remove the `DailyWallpaperUpdate` task from Windows Scheduler.
+- Delete the `wallpaper_activity.log` and `wallpaper_state.json` files.
+- You can then safely delete the project folder if desired.
+
+---
+
 ## 📄 License
 
 This project is open source. Feel free to use and modify.
