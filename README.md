@@ -110,4 +110,4 @@ This will:
 
 ## 📄 License
 
-This project is open source. Feel free to use and modify.
+This project is licensed under the **GPLv3 License**. See the [LICENSE](LICENSE) file for details.

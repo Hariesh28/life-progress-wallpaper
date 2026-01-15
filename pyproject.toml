@@ -5,6 +5,7 @@ description = "High-fidelity 4K wallpaper dashboard visualizing life progress"
 authors = [{name = "User", email = "user@example.com"}]
 readme = "README.md"
 requires-python = ">=3.9"
+license = {text = "GPL-3.0"}
 dependencies = [
     "pillow>=10.0.0",
     "pydantic>=2.0.0",
