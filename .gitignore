@@ -18,6 +18,7 @@ env/
 *.log
 wallpaper_activity.log
 wallpaper_state.json
+life_config.json
 
 # Image Artifacts
 life_wallpaper.png

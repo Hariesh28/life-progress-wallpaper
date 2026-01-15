@@ -41,7 +41,13 @@ _Turn your desktop into a daily reminder to make every day count._
     pip install -r requirements.txt
     ```
 3.  **Configure**:
-    Edit `life_config.json` to set your birthdate and preferences.
+    Copy `life_config.example.json` to `life_config.json` and edit your details:
+
+    ```bash
+    cp life_config.example.json life_config.json
+    ```
+
+    _(Edit `life_config.json` with your Name and DOB)_
 
 4.  **Install Automation**:
     Right-click `scripts\install_task.ps1` and select **"Run with PowerShell"**.
