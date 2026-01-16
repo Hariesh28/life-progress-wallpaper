@@ -9,7 +9,7 @@ if (-not (Test-Path $GuardScript)) {
 }
 
 # Action updates: Run PowerShell hidden, executing the guard script
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$GuardScript`""
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$GuardScript`"" -WorkingDirectory $PSScriptRoot
 
 # Trigger: Check daily at 12:00 AM
 $Trigger = New-ScheduledTaskTrigger -Daily -At 12:00am
