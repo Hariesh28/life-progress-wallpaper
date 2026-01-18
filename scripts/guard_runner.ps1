@@ -48,7 +48,25 @@ try {
         throw "Wallpaper script not found at $WallpaperScript"
     }
 
-    $Process = Start-Process -FilePath $WallpaperScript -WorkingDirectory $ProjectRoot -Wait -NoNewWindow -PassThru
+    $TempOut = [System.IO.Path]::GetTempFileName()
+    $TempErr = [System.IO.Path]::GetTempFileName()
+    try {
+        $Process = Start-Process -FilePath $WallpaperScript -WorkingDirectory $ProjectRoot -Wait -NoNewWindow -PassThru -RedirectStandardOutput $TempOut -RedirectStandardError $TempErr
+
+        $OutContent = Get-Content $TempOut -Raw -ErrorAction SilentlyContinue
+        $ErrContent = Get-Content $TempErr -Raw -ErrorAction SilentlyContinue
+
+        if ($OutContent -or $ErrContent) {
+            Write-Log "=== Script Output Start ==="
+            if ($OutContent) { Write-Log $OutContent }
+            if ($ErrContent) { Write-Log "--- ERROR STREAM ---"; Write-Log $ErrContent }
+            Write-Log "=== Script Output End ==="
+        }
+    }
+    finally {
+        if (Test-Path $TempOut) { Remove-Item $TempOut -Force }
+        if (Test-Path $TempErr) { Remove-Item $TempErr -Force }
+    }
 
     if ($Process.ExitCode -eq 0) {
         Write-Log "Wallpaper update completed successfully."
