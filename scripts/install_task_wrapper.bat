@@ -19,7 +19,7 @@ echo [INFO] Administrative privileges detected.
 echo [INFO] Installing task...
 echo.
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\install_task.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "install_task.ps1"
 
 if %ERRORLEVEL% EQU 0 (
     echo.

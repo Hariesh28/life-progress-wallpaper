@@ -1,30 +1,32 @@
 $ErrorActionPreference = "Stop"
 
-# Function to write to log
+# --- Configuration ---
+# Calculate paths relative to this script (scripts/)
+$ProjectRoot = Resolve-Path "$PSScriptRoot\.."
+$StateFile = "$ProjectRoot\wallpaper_state.json"
+$LogFile = "$ProjectRoot\wallpaper_activity.log"
+$WallpaperScript = "$PSScriptRoot\run_wallpaper.bat"
+
+# --- Logging Helper ---
 function Write-Log {
     param ([string]$Message)
-    # Use $LogFile if available, otherwise try to guess it based on script location
-    $LogPath = if ($script:LogFile) { $script:LogFile } else { "$PSScriptRoot\..\wallpaper_activity.log" }
 
     $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $LogEntry = "[$Timestamp] $Message"
-    try {
-        Add-Content -Path $LogPath -Value $LogEntry -ErrorAction SilentlyContinue
-    } catch {
-        # If logging fails, we can't do much, but we tried.
-    }
+
+    # Console output
     Write-Host $LogEntry
+
+    # File output
+    try {
+        Add-Content -Path $LogFile -Value $LogEntry -ErrorAction SilentlyContinue
+    } catch {
+        Write-Warning "Failed to write to log file: $_"
+    }
 }
 
 try {
-    # Configuration
-    # Since this script is now in /scripts/, we need to look up one level for state/log and sibling for bat
-    $ProjectRoot = (Get-Item "$PSScriptRoot\..").FullName
-    $StateFile = "$ProjectRoot\wallpaper_state.json"
-    $script:LogFile = "$ProjectRoot\wallpaper_activity.log" # Update script-scoped LogFile
-    $WallpaperScript = "$PSScriptRoot\run_wallpaper.bat"
-
-    # 1. Check if we already ran today
+    # 1. Check Previous Execution
     $Today = (Get-Date).ToString("yyyy-MM-dd")
 
     if (Test-Path $StateFile) {
@@ -35,56 +37,57 @@ try {
                 exit 0
             }
         } catch {
-            Write-Log "Warning: Could not read/parse state file. Proceeding with update."
+            Write-Log "Warning: State file corrupted. Proceeding with update."
         }
     }
 
-    # 2. Run the actual wallpaper update
-    Write-Log "Starting wallpaper update..."
-    Write-Log "Running script: $WallpaperScript"
-    Write-Log "Working Directory: $ProjectRoot"
-
+    # 2. Validation
     if (-not (Test-Path $WallpaperScript)) {
-        throw "Wallpaper script not found at $WallpaperScript"
+        throw "Wallpaper script missing at: $WallpaperScript"
     }
 
-    $TempOut = [System.IO.Path]::GetTempFileName()
-    $TempErr = [System.IO.Path]::GetTempFileName()
-    try {
-        $Process = Start-Process -FilePath $WallpaperScript -WorkingDirectory $ProjectRoot -Wait -NoNewWindow -PassThru -RedirectStandardOutput $TempOut -RedirectStandardError $TempErr
+    # 3. Execution
+    Write-Log "Starting wallpaper update..."
+    Write-Log "Script: $WallpaperScript"
 
-        $OutContent = Get-Content $TempOut -Raw -ErrorAction SilentlyContinue
-        $ErrContent = Get-Content $TempErr -Raw -ErrorAction SilentlyContinue
+    # Run the batch file
+    # We use Start-Process to ensure we capture output clearly and separate the process
+    $ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $ProcessInfo.FileName = $WallpaperScript
+    $ProcessInfo.WorkingDirectory = $ProjectRoot
+    $ProcessInfo.RedirectStandardOutput = $true
+    $ProcessInfo.RedirectStandardError = $true
+    $ProcessInfo.UseShellExecute = $false
+    $ProcessInfo.CreateNoWindow = $true
 
-        if ($OutContent -or $ErrContent) {
-            Write-Log "=== Script Output Start ==="
-            if ($OutContent) { Write-Log $OutContent }
-            if ($ErrContent) { Write-Log "--- ERROR STREAM ---"; Write-Log $ErrContent }
-            Write-Log "=== Script Output End ==="
-        }
-    }
-    finally {
-        if (Test-Path $TempOut) { Remove-Item $TempOut -Force }
-        if (Test-Path $TempErr) { Remove-Item $TempErr -Force }
-    }
+    $Process = New-Object System.Diagnostics.Process
+    $Process.StartInfo = $ProcessInfo
+    $Process.Start() | Out-Null
+
+    $StdOut = $Process.StandardOutput.ReadToEnd()
+    $StdErr = $Process.StandardError.ReadToEnd()
+
+    $Process.WaitForExit()
+
+    # 4. Log Output
+    if ($StdOut) { Write-Log "OUTPUT:`n$StdOut" }
+    if ($StdErr) { Write-Log "ERROR:`n$StdErr" }
 
     if ($Process.ExitCode -eq 0) {
-        Write-Log "Wallpaper update completed successfully."
+        Write-Log "SUCCESS: Wallpaper updated."
 
-        # 3. Update state file
+        # 5. Update State
         $NewState = @{
             LastRunDate = $Today
             LastRunTime = (Get-Date).ToString("HH:mm:ss")
         }
         $NewState | ConvertTo-Json | Set-Content $StateFile
-    }
-    else {
-        Write-Log "ERROR: Wallpaper script failed with exit code $($Process.ExitCode)."
+    } else {
+        Write-Log "FAILURE: Script exited with code $($Process.ExitCode)"
         exit 1
     }
 
-}
-catch {
+} catch {
     Write-Log "CRITICAL ERROR: $_"
     Write-Log "Stack Trace: $($_.ScriptStackTrace)"
     exit 1

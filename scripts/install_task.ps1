@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$TaskName = "DailyWallpaperUpdate"
+$TaskName = "LifeWallpaperUpdate"
 $GuardScript = "$PSScriptRoot\guard_runner.ps1"
 
 if (-not (Test-Path $GuardScript)) {
