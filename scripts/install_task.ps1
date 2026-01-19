@@ -1,6 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $TaskName = "LifeWallpaperUpdate"
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
 $GuardScript = "$PSScriptRoot\guard_runner.py"
 
 if (-not (Test-Path $GuardScript)) {

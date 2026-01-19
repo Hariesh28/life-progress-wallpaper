@@ -34,3 +34,5 @@ foreach ($File in $FilesToRemove) {
 
 Write-Host "`nUninstallation Complete." -ForegroundColor Green
 Write-Host "To completely remove the program, you can now safely delete this folder." -ForegroundColor Gray
+
+Read-Host "Press any key to continue..."
