@@ -25,7 +25,7 @@ if %ERRORLEVEL% EQU 0 (
     echo.
     echo [SUCCESS] Task installation command finished.
     echo           Verifying task existence...
-    schtasks /query /TN "DailyWallpaperUpdate" /FO LIST
+    schtasks /query /TN "LifeWallpaperUpdate" /FO LIST
 ) else (
     echo.
     echo [ERROR] PowerShell script failed.
