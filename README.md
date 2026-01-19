@@ -82,6 +82,7 @@ All settings are stored in `life_config.json`. Think of this as the control cent
     "dob": "2000-01-01",
     "life_expectancy": 80
   },
+  "theme": "original",
   "collections": {
     "mantras": ["MEMENTO MORI", "STAY HARD", "HYDRATE OR DIEDRATE"],
     "footer_quotes": [
@@ -99,6 +100,7 @@ All settings are stored in `life_config.json`. Think of this as the control cent
 | `name`            | String  | Your name. Make it epic.                                                   |
 | `dob`             | String  | Your birthday (`YYYY-MM-DD`). The engine of the whole operation.           |
 | `life_expectancy` | Integer | Total years you're planning on sticking around (default: 80). Aim high! 🚀 |
+| `theme`           | String  | Appearance style. Options: `'original'` (Dashboard), `'og'` (Minimal).     |
 | `mantras`         | List    | Short vibes for the top of the screen. Randomly picked daily.              |
 | `footer_quotes`   | List    | Deep thoughts for the bottom. Also random.                                 |
 
