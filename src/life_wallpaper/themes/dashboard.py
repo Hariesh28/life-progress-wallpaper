@@ -37,45 +37,39 @@ class DashboardRenderer:
         self.colors = self.STYLE["colors"]
         self.fonts = {}  # Will be loaded in render
 
-    def _get_font(self, size, bold=False):
-        """Smart font loader matching the original logic but adaptable."""
-        # Using the project's utility if possible or falling back to original search
-        # keeping original search for fidelity to the request "as default wallpaper"
-        system = platform.system()
-        fonts = []
-
-        if system == "Windows":
-            # Prioritize project fonts if available in system, otherwise fallbacks
-            fonts = [
-                "seguiemj.ttf",
-                "arialbd.ttf" if bold else "arial.ttf",
-                "calibri.ttf",
-            ]
-        elif system == "Darwin":
-            fonts = ["/Library/Fonts/Arial.ttf", "/System/Library/Fonts/SFNS.ttf"]
-        else:
-            fonts = ["DejaVuSans.ttf", "FreeSans.ttf", "LiberationSans-Regular.ttf"]
-
-        for f in fonts:
-            try:
-                return ImageFont.truetype(f, size)
-            except OSError:
-                continue
-
-        print(f"Warning: Could not load preferred font size {size}. Using default.")
-        return ImageFont.load_default()
-
     def _load_fonts(self):
+        # Cross-platform font priorities
+        # Prioritize standard legible fonts over Emoji/Symbol fonts
+        F_BOLD = [
+            "arialbd.ttf",
+            "calibrib.ttf",
+            "/Library/Fonts/Arial Bold.ttf",
+            "DejaVuSans-Bold.ttf",
+            "FreeSansBold.ttf",
+        ]
+
+        F_REGULAR = [
+            "arial.ttf",
+            "segoeui.ttf",
+            "calibri.ttf",
+            "/Library/Fonts/Arial.ttf",
+            "/System/Library/Fonts/SFNS.ttf",
+            "DejaVuSans.ttf",
+            "FreeSans.ttf",
+            "LiberationSans-Regular.ttf",
+            "seguiemj.ttf",  # Fallback for symbols if needed
+        ]
+
         self.fonts = {
-            "hero": self._get_font(180, True),
-            "date": self._get_font(80),
-            "sub": self._get_font(50, True),
-            "medium": self._get_font(34),
-            "small": self._get_font(24),
-            "tiny": self._get_font(22),
-            "cal_head": self._get_font(40, True),
-            "cal_days": self._get_font(30),
-            "cal_num": self._get_font(55),
+            "hero": load_font_family(F_BOLD, 180),
+            "date": load_font_family(F_REGULAR, 80),
+            "sub": load_font_family(F_BOLD, 50),
+            "medium": load_font_family(F_REGULAR, 34),
+            "small": load_font_family(F_REGULAR, 24),
+            "tiny": load_font_family(F_REGULAR, 22),
+            "cal_head": load_font_family(F_BOLD, 40),
+            "cal_days": load_font_family(F_REGULAR, 30),
+            "cal_num": load_font_family(F_REGULAR, 55),
         }
 
     def _draw_centered(self, draw, cx, cy, text, font, fill):
