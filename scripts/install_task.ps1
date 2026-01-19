@@ -1,15 +1,23 @@
 $ErrorActionPreference = "Stop"
 
 $TaskName = "LifeWallpaperUpdate"
-$GuardScript = "$PSScriptRoot\guard_runner.ps1"
+$GuardScript = "$PSScriptRoot\guard_runner.py"
 
 if (-not (Test-Path $GuardScript)) {
-    Write-Error "Could not find guard_runner.ps1 at $GuardScript"
+    Write-Error "Could not find guard_runner.py at $GuardScript"
     exit 1
 }
 
-# Action updates: Run PowerShell hidden, executing the guard script
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$GuardScript`"" -WorkingDirectory $PSScriptRoot
+# Python executable (pythonw.exe for no window)
+$PythonExe = "$ProjectRoot\venv\Scripts\pythonw.exe"
+
+if (-not (Test-Path $PythonExe)) {
+    Write-Error "Could not find pythonw.exe at $PythonExe"
+    exit 1
+}
+
+# Action updates: Run pythonw directly
+$Action = New-ScheduledTaskAction -Execute $PythonExe -Argument "`"$GuardScript`"" -WorkingDirectory $PSScriptRoot
 
 # Triggers:
 # 1. Daily at 12:00 AM

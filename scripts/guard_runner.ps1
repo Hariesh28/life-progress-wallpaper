@@ -1,3 +1,7 @@
+param (
+    [switch]$Force
+)
+
 $ErrorActionPreference = "Stop"
 
 # --- Configuration ---
@@ -17,11 +21,16 @@ function Write-Log {
     # Console output
     Write-Host $LogEntry
 
-    # File output
-    try {
-        Add-Content -Path $LogFile -Value $LogEntry -ErrorAction SilentlyContinue
-    } catch {
-        Write-Warning "Failed to write to log file: $_"
+    # File output with simple retry logic for locking
+    $RetryCount = 3
+    while ($RetryCount -gt 0) {
+        try {
+            Add-Content -Path $LogFile -Value $LogEntry -ErrorAction Stop
+            break
+        } catch {
+            Start-Sleep -Milliseconds 100
+            $RetryCount--
+        }
     }
 }
 
@@ -29,16 +38,21 @@ try {
     # 1. Check Previous Execution
     $Today = (Get-Date).ToString("yyyy-MM-dd")
 
-    if (Test-Path $StateFile) {
+    if (-not $Force -and (Test-Path $StateFile)) {
         try {
-            $State = Get-Content $StateFile | ConvertFrom-Json
-            if ($State.LastRunDate -eq $Today) {
-                Write-Log "Skipping update: Already executed for today ($Today)."
-                exit 0
+            $StateContent = Get-Content $StateFile -Raw
+            if ($StateContent) {
+                $State = $StateContent | ConvertFrom-Json
+                if ($State.LastRunDate -eq $Today) {
+                    Write-Log "Skipping update: Already executed for today ($Today)."
+                    exit 0
+                }
             }
         } catch {
-            Write-Log "Warning: State file corrupted. Proceeding with update."
+            Write-Log "Warning: State file corrupted or unreadable. Proceeding with update."
         }
+    } elseif ($Force) {
+        Write-Log "Force flag detected. Bypassing date check."
     }
 
     # 2. Validation
@@ -76,12 +90,16 @@ try {
     if ($Process.ExitCode -eq 0) {
         Write-Log "SUCCESS: Wallpaper updated."
 
-        # 5. Update State
+        # 5. Update State (Atomic-ish)
         $NewState = @{
             LastRunDate = $Today
             LastRunTime = (Get-Date).ToString("HH:mm:ss")
         }
-        $NewState | ConvertTo-Json | Set-Content $StateFile
+
+        $TempStateFile = "$StateFile.tmp"
+        $NewState | ConvertTo-Json | Set-Content $TempStateFile
+        Move-Item -Path $TempStateFile -Destination $StateFile -Force
+
     } else {
         Write-Log "FAILURE: Script exited with code $($Process.ExitCode)"
         exit 1
