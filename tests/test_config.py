@@ -18,4 +18,15 @@ def test_config_structure():
     )
     assert config.profile.name == "Test User"
     assert config.profile.dob == date(1990, 1, 1)
+    assert config.profile.dob == date(1990, 1, 1)
     assert config.collections.mantras[0] == "Test Mantra"
+
+
+def test_config_lines_up_with_defaults():
+    """Ensure our defaults match the production requirements."""
+    config = AppConfig(
+        profile={"name": "Test", "dob": "2000-01-01", "life_expectancy": 80},
+        collections={"mantras": [], "footer_quotes": []},
+    )
+    # Default theme should be "original" (Dashboard)
+    assert config.theme == "original"

@@ -17,21 +17,25 @@ def set_wallpaper(path: str):
         print(f"Wallpaper generated at: {path}")
 
 
+def get_renderer(config):
+    """Factory to return the correct renderer based on config theme."""
+    print(f"Theme selected: {config.theme}")
+    if config.theme == "original":
+        return DashboardRenderer(config)
+    elif config.theme == "og":
+        return WallpaperRenderer(config)
+    else:
+        # Fallback
+        print(f"Unknown theme '{config.theme}', defaulting to 'original' (Dashboard)")
+        return DashboardRenderer(config)
+
+
 def main():
     """Main execution point."""
     print("Loading configuration...")
     config = load_config()
 
-    print(f"Theme selected: {config.theme}")
-    if config.theme == "original":
-        app = DashboardRenderer(config)
-    elif config.theme == "og":
-        app = WallpaperRenderer(config)
-    else:
-        # Fallback
-        print(f"Unknown theme '{config.theme}', defaulting to 'original' (Dashboard)")
-        app = DashboardRenderer(config)
-
+    app = get_renderer(config)
     output_path = app.render()
 
     set_wallpaper(output_path)
