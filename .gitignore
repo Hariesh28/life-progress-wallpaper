@@ -1,27 +1,64 @@
-# Python
+# --- Python ---
 __pycache__/
 *.py[cod]
 *$py.class
-*.egg-info/
-.eggs/
-dist/
+*.so
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments ---
 venv/
 .venv/
 env/
+.env
+.venv.bak/
 
-# VS Code
+# --- Testing & Quality Assurance ---
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# --- IDE & Editors ---
 .vscode/
 *.code-workspace
+.idea/
+*.swp
+*.swo
 
-# Runtime / Logs
+# --- Project Specific Defaults ---
+# Local configuration (should not be committed)
+config.json
+life_config.json
+# Note: life_config.example.json SHOULD be committed
+
+# --- Runtime Artifacts ---
 *.log
 wallpaper_activity.log
 wallpaper_state.json
-life_config.json
 
-# Image Artifacts
+# --- Generated Outputs ---
 life_wallpaper.png
 
-# MacOS
+# --- OS Specific ---
 .DS_Store
+Thumbs.db
+Desktop.ini

@@ -2,6 +2,7 @@ import sys
 import ctypes
 from .config import load_config
 from .renderer import WallpaperRenderer
+from .themes.dashboard import DashboardRenderer
 
 
 def set_wallpaper(path: str):
@@ -21,7 +22,16 @@ def main():
     print("Loading configuration...")
     config = load_config()
 
-    app = WallpaperRenderer(config)
+    print(f"Theme selected: {config.theme}")
+    if config.theme == "original":
+        app = DashboardRenderer(config)
+    elif config.theme == "og":
+        app = WallpaperRenderer(config)
+    else:
+        # Fallback
+        print(f"Unknown theme '{config.theme}', defaulting to 'original' (Dashboard)")
+        app = DashboardRenderer(config)
+
     output_path = app.render()
 
     set_wallpaper(output_path)

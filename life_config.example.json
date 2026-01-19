@@ -1,4 +1,6 @@
 {
+  "theme": "original",
+  "_comment_theme": "Options: 'original' (Dashboard/Default), 'og' (Old Life Progress)",
   "profile": {
     "name": "YOUR_NAME_HERE",
     "dob": "2000-01-01",

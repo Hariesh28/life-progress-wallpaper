@@ -11,6 +11,7 @@ DEFAULT_DATA = {
         "mantras": ["THIS DAY WILL NOT COME AGAIN"],
         "footer_quotes": ["TIME IS THE ONLY NON-RENEWABLE RESOURCE"],
     },
+    "theme": "original",
 }
 
 
@@ -28,6 +29,7 @@ class Collections(BaseModel):
 class AppConfig(BaseModel):
     profile: Profile
     collections: Collections
+    theme: str = "original"  # Options: "original" (Dashboard), "og" (Life Progress)
 
 
 def load_config(config_path: Optional[str] = None) -> AppConfig:
