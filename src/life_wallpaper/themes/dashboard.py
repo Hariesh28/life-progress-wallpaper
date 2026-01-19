@@ -28,7 +28,7 @@ class DashboardRenderer:
         "layout": {
             "margin": 180,
             "text_optical_offset_y": -4,
-            "calendar_highlight_offset_y": -10,
+            "calendar_highlight_offset_y": -5,
         },
     }
 
