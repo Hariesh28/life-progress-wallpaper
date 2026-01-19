@@ -11,8 +11,14 @@ if (-not (Test-Path $GuardScript)) {
 # Action updates: Run PowerShell hidden, executing the guard script
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$GuardScript`"" -WorkingDirectory $PSScriptRoot
 
-# Trigger: Check daily at 12:00 AM
-$Trigger = New-ScheduledTaskTrigger -Daily -At 12:00am
+# Triggers:
+# 1. Daily at 12:00 AM
+$TriggerDaily = New-ScheduledTaskTrigger -Daily -At 12:00am
+# 2. At Logon (Ensures it runs if machine was off and "StartWhenAvailable" misses)
+$TriggerLogon = New-ScheduledTaskTrigger -AtLogon
+
+# Combine triggers
+$Triggers = @($TriggerDaily, $TriggerLogon)
 
 # Settings:
 # - Run on battery
@@ -26,7 +32,7 @@ try {
     $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
     # Register the task
-    Register-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Settings -TaskName $TaskName -Description "Daily wallpaper update with guard against duplicate runs." -User $CurrentUser -Force
+    Register-ScheduledTask -Action $Action -Trigger $Triggers -Settings $Settings -TaskName $TaskName -Description "Daily wallpaper update with guard against duplicate runs." -User $CurrentUser -Force
 
     Write-Host "Task '$TaskName' created successfully."
     Write-Host "Run As User: $CurrentUser"
