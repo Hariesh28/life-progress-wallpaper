@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$TaskName = "DailyWallpaperUpdate"
+$TaskName = "LifeWallpaperUpdate"
 
 Write-Host "Uninstalling Life Wallpaper Automation..." -ForegroundColor Cyan
 

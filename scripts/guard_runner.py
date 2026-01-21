@@ -15,7 +15,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 STATE_FILE = os.path.join(PROJECT_ROOT, "wallpaper_state.json")
 LOG_FILE = os.path.join(PROJECT_ROOT, "wallpaper_activity.log")
-WALLPAPER_MODULE = "src.life_wallpaper.main"
+WALLPAPER_MODULE = "life_wallpaper.main"
 
 
 def setup_logging():

@@ -44,28 +44,12 @@ Every day at midnight, this little bot wakes up, does the math (so you don't hav
     cd life-wallpaper
     ```
 
-2.  **Setup Environment**
-    Let's keep things tidy with a virtual environment.
+2.  **Activate Automation**
+    Double-click `scripts\setup.bat`.
 
-    ```bash
-    python -m venv venv
-    .\venv\Scripts\activate
-    pip install -r requirements.txt
-    ```
+    > **Boom! 💥** You're done. This script sets up the environment, installs dependencies, and schedules the task for you.
 
-3.  **Config Your Life**
-    Copy the template so you don't leak your data (we got you).
-
-    ```bash
-    cp life_config.example.json life_config.json
-    ```
-
-    _(Edit `life_config.json` with your real name and birthday. Don't lie, the math knows.)_
-
-4.  **Activate Automation**
-    Right-click `scripts\install_task.ps1` and select **"Run with PowerShell"**.
-
-    > **Boom! 💥** You're done. Your wallpaper will now refresh daily like magic.
+    _(Manual update? Run `scripts\run_wallpaper.bat`)_
 
 ---
 
@@ -132,8 +116,8 @@ Impatient? Force an update:
 `.\scripts\run_wallpaper.bat`
 
 **"I'm done with this."**
-No hard feelings. Run the uninstaller (as Admin) and we'll clean up our mess:
-`.\scripts\uninstall_task.ps1`
+No hard feelings. Run the uninstaller and we'll clean up our mess:
+`.\scripts\uninstall.bat`
 
 ---
 
